@@ -135,6 +135,47 @@
     }
     .pain-list li, .video-list li { box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
   }
+
+  /* MailerLite embed overrides — hide default "Newsletter" title/description
+     and reskin the form to match the page instead of MailerLite's default theme */
+  .ml-embedded .ml-form-embedContainer {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+  .ml-embedded .ml-form-embedContent {
+    display: none !important;
+  }
+  .ml-embedded .ml-form-embedBody,
+  .ml-embedded .ml-form-successBody {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 24px !important;
+  }
+  .ml-embedded input.form-control {
+    background: var(--bg) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    border-radius: 8px !important;
+    padding: 12px 14px !important;
+    font-size: 15px !important;
+    width: 100% !important;
+  }
+  .ml-embedded input.form-control::placeholder { color: var(--text-dim) !important; }
+  .ml-embedded .ml-form-embedSubmit button.primary {
+    background: var(--accent) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    padding: 14px 28px !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+    cursor: pointer;
+  }
+  .ml-embedded .ml-form-embedSubmit button.primary:hover { background: var(--accent-dim) !important; }
 </style>
 </head>
 <body>
