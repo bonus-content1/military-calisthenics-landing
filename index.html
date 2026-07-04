@@ -123,79 +123,55 @@
     .pain-list li, .video-list li { box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
   }
 
-  /* MailerLite embed overrides — hide default "Newsletter" title/description
-     and reskin the form to match the page instead of MailerLite's default theme.
-     Scoped under #lp (ID beats MailerLite's own class-based CSS regardless of load
-     order) and targeted via input[type=email] / button[type=submit] rather than
-     guessed MailerLite class names, since those are guaranteed by the form markup
-     itself and won't drift if MailerLite changes their internal class scaffold. */
-  #lp .ml-embedded * {
-    box-sizing: border-box !important;
-    font-family: inherit !important;
+  /* Custom lead-capture form — posts directly to MailerLite's form endpoint as a
+     backend only. No MailerLite widget/CSS is ever rendered, so this is just our
+     own form styled to match the page. */
+  .lead-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
   }
-  #lp .ml-embedded {
-    background: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
-    padding: 0 !important;
+  .lead-form input[type="email"] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 13px 14px;
+    font-size: 15px;
+    width: 100%;
   }
-  #lp .ml-embedded h1,
-  #lp .ml-embedded h2,
-  #lp .ml-embedded h3,
-  #lp .ml-embedded h4,
-  #lp .ml-embedded h5,
-  #lp .ml-embedded h6,
-  #lp .ml-embedded > div > p:first-of-type {
-    display: none !important;
+  .lead-form input[type="email"]::placeholder { color: var(--text-dim); }
+  .lead-form button[type="submit"] {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 14px 20px;
+    width: 100%;
+    cursor: pointer;
   }
-  #lp .ml-embedded form {
-    background: var(--card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 10px !important;
-    padding: 20px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
+  .lead-form button[type="submit"]:hover { background: var(--accent-dim); }
+  .lead-form button[type="submit"]:disabled { opacity: 0.7; cursor: default; }
+  .lead-form .form-status {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0;
+    min-height: 16px;
   }
-  #lp .ml-embedded input[type="email"],
-  #lp .ml-embedded input[type="text"] {
-    background: var(--bg) !important;
-    border: 1px solid var(--border) !important;
-    color: var(--text) !important;
-    border-radius: 8px !important;
-    padding: 13px 14px !important;
-    font-size: 15px !important;
-    width: 100% !important;
-    height: auto !important;
-    box-shadow: none !important;
-    margin: 0 !important;
-  }
-  #lp .ml-embedded input[type="email"]::placeholder,
-  #lp .ml-embedded input[type="text"]::placeholder {
-    color: var(--text-dim) !important;
-  }
-  #lp .ml-embedded button[type="submit"] {
-    background: var(--accent) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 8px !important;
-    font-weight: 700 !important;
-    font-size: 16px !important;
-    padding: 14px 20px !important;
-    width: 100% !important;
-    margin: 0 !important;
-    cursor: pointer !important;
-    box-shadow: none !important;
-  }
-  #lp .ml-embedded button[type="submit"]:hover {
-    background: var(--accent-dim) !important;
-  }
-  #lp .ml-embedded [class*="success"] {
-    background: var(--card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 10px !important;
-    padding: 20px !important;
-    color: var(--text) !important;
+  .form-thanks {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    color: var(--text);
+    font-size: 15px;
+    margin: 0;
   }
 </style>
 </head>
@@ -209,15 +185,11 @@
 
     <div class="hero-form">
       <p class="form-note">Enter your email and it's on its way — plus a heads-up when the full program drops.</p>
-      <!-- MailerLite embedded form -->
-      <script>
-        (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
-        .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
-        n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
-        (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-        ml('account', '2368025');
-      </script>
-      <div class="ml-embedded" data-form="qRq5lh"></div>
+      <form id="video-form" class="lead-form">
+        <input type="email" name="email" placeholder="Email address" required autocomplete="email">
+        <button type="submit">Send Me the Free Video</button>
+        <p class="form-status" aria-live="polite"></p>
+      </form>
     </div>
   </div>
 </header>
@@ -250,6 +222,37 @@
     <p>We respect your inbox. Unsubscribe anytime.</p>
   </div>
 </footer>
+
+<script>
+(function () {
+  var form = document.getElementById('video-form');
+  var status = form.querySelector('.form-status');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = form.email.value.trim();
+    if (!email) return;
+
+    var btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    status.textContent = '';
+
+    var body = new URLSearchParams();
+    body.set('fields[email]', email);
+    body.set('ml-submit', '1');
+    body.set('anticsrf', 'true');
+
+    fetch('https://assets.mailerlite.com/jsonp/2368025/forms/192015553621133028/subscribe', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString()
+    }).finally(function () {
+      form.outerHTML = '<p class="form-thanks">Check your inbox to confirm your email — the video is on its way.</p>';
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
